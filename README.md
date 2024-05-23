@@ -1,7 +1,7 @@
 # task-management-system
 This is a task management system available on web, which allows a user to log tasks and send an SMS / Email message to the complainant.
-##Run project
-####Frontend
+## Run project
+#### Frontend
  cd Client
   npm start
   Starts the development server.
@@ -9,11 +9,11 @@ This is a task management system available on web, which allows a user to log ta
   npm run build
     Bundles the app into static files for production.
     
-####Backend
+#### Backend
   cd Backend
     run => yarn 
-    #development
+####### development
     run => yarn run dev
-    #production
+    # production
     run  => yarn start
     
