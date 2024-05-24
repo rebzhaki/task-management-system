@@ -15,6 +15,8 @@ import {
   setTaskComplainant,
 } from "../controllers";
 import { DatabaseConnection } from "./app";
+import { sendEmail } from "../mailer";
+import { error } from "console";
 
 const router = Router();
 const app: Express = express();
@@ -214,7 +216,7 @@ router.patch(
 
       const user = await getUserById(connection, complainant_id);
       let userData = user.map((data: any) => {
-        return { phoneNumber: data["phoneNumber"], name: data["fullName"] };
+        return { email: data["email"], name: data["fullName"] };
       });
 
       //get project by id
@@ -231,9 +233,10 @@ router.patch(
           complainant: userData,
           TrackingNumber: TrackingNumber,
         };
-        console.log("data", data);
+        const emailInfo = await sendEmail(data);
+        console.log("here", emailInfo);
 
-        await setTaskComplainant(connection, complainant_id, taskId);
+        // await setTaskComplainant(connection, complainant_id, taskId);
 
         res.status(200).json({
           success: true,
