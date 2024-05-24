@@ -4,7 +4,6 @@ import { Connection, Request } from "tedious";
 
 export const configs: any = {
   server: config.SERVER,
-  database: config.DATABASE,
   authentication: {
     type: "default",
     options: {
@@ -13,12 +12,13 @@ export const configs: any = {
     },
   },
   options: {
+    database: config.DATABASE,
     encrypt: false,
     port: 1433,
   },
 };
 
-export const DatabaseConnection = (app: Express) => {
+export const DatabaseConnection = () => {
   const connection = new Connection(configs);
 
   connection.on("connect", async (err) => {
