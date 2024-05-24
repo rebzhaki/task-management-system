@@ -1,12 +1,24 @@
-import express, { Router, Request, Response } from "express";
+import express, { Router, Request, Response, Express } from "express";
 import bcrypt from "bcrypt";
 import { body, param } from "express-validator";
 import jwt from "jsonwebtoken";
 import { validateRequest } from "../middlewares";
 import { config } from "../config";
 import { nanoid } from "nanoid";
+import {
+  checkIfUserExists,
+  getSingleUser,
+  getTaskById,
+  getUserById,
+  saveNewTask,
+  saveNewUser,
+  setTaskComplainant,
+} from "../controllers";
+import { DatabaseConnection } from "./app";
 
 const router = Router();
+const app: Express = express();
+const connection = DatabaseConnection();
 
 //auth routes
 router.post(
@@ -23,32 +35,41 @@ router.post(
     try {
       let { fullName, phoneNumber, email, password, confrimPassword } =
         req.body;
-      if (password !== confrimPassword)
-        return res
-          .status(400)
-          .json({ msg: "Password and Confirm Password do not match" });
-      bcrypt.genSalt(10, (err, salt) => {
-        if (err) console.log(err);
+      let user = await checkIfUserExists(connection, email);
 
-        bcrypt.hash(password, salt, function (err, hash) {
-          password = hash;
-          //   const newUser = new User({
-          //     fullName,
-          //     phoneNumber,
-          //     email,
-          //     password,
-          //   });
+      if (user === null) {
+        res.status(400).json({ success: false, message: "User aleady exists" });
+      } else {
+        if (password !== confrimPassword)
+          return res.status(400).json({
+            success: false,
+            message: "Password and Confirm Password do not match",
+          });
+        bcrypt.genSalt(10, (err, salt) => {
+          if (err) console.log(err);
 
-          //   newUser.save();
-          res.status(200).json({
-            success: true,
-            message: "User successfully registered",
-            user: "",
+          bcrypt.hash(password, salt, async function (err, hash) {
+            password = hash;
+            const newUser = {
+              fullName,
+              phoneNumber,
+              email,
+              password,
+            };
+            await saveNewUser(connection, newUser);
+            res.status(200).json({
+              success: true,
+              message: "User successfully registered",
+            });
           });
         });
-      });
+      }
     } catch (error) {
-      res.status(400).json({ error: error });
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error,
+      });
     }
   }
 );
@@ -60,33 +81,41 @@ router.post(
     body("password").notEmpty().withMessage("Password is required"),
   ],
   validateRequest,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
-      // User.findOne({
-      //   email: req.body.email,
-      // }).exec((err, user) => {
-      //   var passwordIsValid = bcrypt.compareSync(
-      //     req.body.password,
-      //     user.password
-      //   );
-      //   if (!passwordIsValid) {
-      //     return res.status(401).send({
-      //       accessToken: null,
-      //       message: "Invalid Password!",
-      //     });
-      //   }
-      //   let email = req.body.email;
-      //   const accessToken = jwt.sign({ email: email }, config.JWT_SECRET_KEY, {
-      //     expiresIn: "1h",
-      //   });
-      //   console.log("userPass", accessToken);
-      //   res.status(200).json({
-      //     success: true,
-      //     token: accessToken,
-      //   });
-      // });
+      const { email, password } = req.body;
+      const user = await getSingleUser(connection, email);
+      let pass = await user
+        .map((data: any) => {
+          return data["password"];
+        })
+        .join(",");
+
+      if (user === null) {
+        res.status(400).json({ status: false, message: "User Not Found" });
+      } else {
+        let passwordIsValid = bcrypt.compareSync(password, pass);
+        if (!passwordIsValid) {
+          return res.status(401).send({
+            accessToken: null,
+            message: "Invalid Password!",
+          });
+        }
+        const accessToken = jwt.sign({ email: email }, config.JWT_SECRET_KEY, {
+          expiresIn: "1h",
+        });
+        res.status(200).json({
+          success: true,
+          message: "Successfully Logged in",
+          data: accessToken,
+        });
+      }
     } catch (error) {
-      res.status(400).json({ error: error });
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error,
+      });
     }
   }
 );
@@ -106,12 +135,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       // check authenticated user
-      const {
-        task_name: any,
-        task_priority,
-        due_date,
-        task_description,
-      } = req.body;
+      const { task_name, task_priority, due_date, task_description } = req.body;
       const authenticationHeader = req.headers["authorization"];
       const token: any =
         authenticationHeader && authenticationHeader.split(" ")[1];
@@ -120,7 +144,7 @@ router.post(
           success: "false",
           message: "Denied access, no token provided",
         });
-      let decodedData = jwt.verify(
+      let decodedData: any = jwt.verify(
         token,
         config.JWT_SECRET_KEY,
         (err: any, data: any) => {
@@ -129,64 +153,101 @@ router.post(
           return data;
         }
       );
-      const userId = decodedData;
-      //validate user pending
+      const userEmail = decodedData["email"];
+      const user = await getSingleUser(connection, userEmail);
+      let userId = user.map((data: any) => data["id"]).join(",");
 
       //generate tracking number
       const trackingNumber = `T-${nanoid(5)}`;
-      // const newTask = new Task({
-      //   task_name: task_name,
-      //   task_priority: task_priority,
-      //   due_date: due_date,
-      //   task_description: task_description,
-      //   trackingNumber: trackingNumber,
-      //   task_assigner_id: userId
-      // });
-      // newTask.save();
+      const newTask = {
+        task_name: task_name,
+        task_priority: task_priority,
+        due_date: due_date,
+        task_description: task_description,
+        tracking_number: trackingNumber,
+        task_assigner_id: userId,
+      };
+      await saveNewTask(connection, newTask);
 
       res.status(200).json({
         success: true,
         message: "Task created successfully",
-        // data: newTask
+        data: newTask,
       });
     } catch (error) {
-      res.status(500).json({ error: error });
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error,
+      });
     }
   }
 );
 
 router.patch(
-  "/updateTask:_id",
+  "/updateTaskComplainant/:_id",
   [param("_id").notEmpty().withMessage("_id is required")],
   validateRequest,
   async (req: Request, res: Response) => {
-    const taskId = req.params._id;
-    const updatedFields = req.body;
-    const authenticationHeader = req.headers["authorization"];
-    const token: any =
-      authenticationHeader && authenticationHeader.split(" ")[1];
-    if (!token)
-      res.status(401).json({
-        success: "false",
-        message: "Denied access, no token provided",
+    try {
+      const taskId = req.params._id;
+      const { complainant_id } = req.body;
+
+      const authenticationHeader = req.headers["authorization"];
+      const token: any =
+        authenticationHeader && authenticationHeader.split(" ")[1];
+      if (!token)
+        res.status(401).json({
+          success: "false",
+          message: "Denied access, no token provided",
+        });
+
+      let decodedData: any = jwt.verify(
+        token,
+        config.JWT_SECRET_KEY,
+        (err: any, data: any) => {
+          if (err)
+            res.status(403).json({ success: false, message: "Invalid Token" });
+          return data;
+        }
+      );
+
+      const user = await getUserById(connection, complainant_id);
+      let userData = user.map((data: any) => {
+        return { phoneNumber: data["phoneNumber"], name: data["fullName"] };
       });
-    let decodedData = jwt.verify(
-      token,
-      config.JWT_SECRET_KEY,
-      (err: any, data: any) => {
-        if (err)
-          res.status(403).json({ success: false, message: "Invalid Token" });
-        return data;
+
+      //get project by id
+      let task = await getTaskById(connection, taskId);
+      if (task === null) {
+        res
+          .status(403)
+          .json({ success: false, message: "Task does not exist" });
+      } else {
+        const TrackingNumber = task
+          .map((data: any) => data["tracking_number"])
+          .join(",");
+        const data = {
+          complainant: userData,
+          TrackingNumber: TrackingNumber,
+        };
+        console.log("data", data);
+
+        await setTaskComplainant(connection, complainant_id, taskId);
+
+        res.status(200).json({
+          success: true,
+          message: "Complainant assigned successfully",
+          data: data,
+        });
       }
-    );
-    const userId = decodedData;
-    //validate user pending
-
-    //validate task id pending
-
-    //get project by id
-
-    //update complainant_id
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        error: error,
+      });
+    }
   }
 );
 export default router;
