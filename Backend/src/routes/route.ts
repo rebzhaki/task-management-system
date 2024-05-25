@@ -2,7 +2,7 @@ import express, { Router, Request, Response, Express } from "express";
 import bcrypt from "bcrypt";
 import { body, param } from "express-validator";
 import jwt from "jsonwebtoken";
-import { validateRequest } from "../middlewares";
+import { blacklist, checkBlacklist, validateRequest } from "../middlewares";
 import { config } from "../config";
 import { nanoid } from "nanoid";
 import {
@@ -30,13 +30,16 @@ router.post(
     body("phoneNumber").notEmpty().withMessage("Phone Number is required"),
     body("email").isEmail().withMessage("Email Address is required"),
     body("password").notEmpty().withMessage("Password is required"),
-    body("confrimPassword").notEmpty().withMessage("Password is required"),
+    body("confrimPassword")
+      .notEmpty()
+      .withMessage("Confirm Password is required"),
   ],
   validateRequest,
   async (req: Request, res: Response) => {
     try {
       let { fullName, phoneNumber, email, password, confrimPassword } =
         req.body;
+
       let user = await checkIfUserExists(connection, email);
 
       if (user === null) {
@@ -86,6 +89,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
+
       const user = await getSingleUser(connection, email);
       let pass = await user
         .map((data: any) => {
@@ -122,6 +126,12 @@ router.post(
   }
 );
 
+router.post("/logout", checkBlacklist, async (req, res) => {
+  const token = req.headers.authorization;
+  blacklist.add(token);
+  res.status(200).json({ message: "Logout successful" });
+});
+
 //tasks routes
 router.post(
   "/createNewTask",
@@ -150,9 +160,7 @@ router.post(
         token,
         config.JWT_SECRET_KEY,
         (err: any, data: any) => {
-          if (err)
-            res.status(403).json({ success: false, message: "Invalid Token" });
-          return data;
+          if (err) throw err;
         }
       );
       const userEmail = decodedData["email"];
@@ -204,15 +212,9 @@ router.patch(
           message: "Denied access, no token provided",
         });
 
-      let decodedData: any = jwt.verify(
-        token,
-        config.JWT_SECRET_KEY,
-        (err: any, data: any) => {
-          if (err)
-            res.status(403).json({ success: false, message: "Invalid Token" });
-          return data;
-        }
-      );
+      jwt.verify(token, config.JWT_SECRET_KEY, (err: any, data: any) => {
+        if (err) throw err;
+      });
 
       const user = await getUserById(connection, complainant_id);
       let userData = user.map((data: any) => {
@@ -233,15 +235,16 @@ router.patch(
           complainant: userData,
           TrackingNumber: TrackingNumber,
         };
-        const emailInfo = await sendEmail(data);
-        console.log("here", emailInfo);
 
-        // await setTaskComplainant(connection, complainant_id, taskId);
+        const [_, emailInfo] = await Promise.all([
+          setTaskComplainant(connection, complainant_id, taskId),
+          sendEmail(data),
+        ]);
 
         res.status(200).json({
           success: true,
-          message: "Complainant assigned successfully",
-          data: data,
+          message: "Complainant assigned successfully and email sent ",
+          data: emailInfo,
         });
       }
     } catch (error) {
