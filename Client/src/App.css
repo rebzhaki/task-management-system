@@ -1,5 +1,47 @@
 .App {
+  margin-top: 10px;
+}
+.formInput {
+  border: 2px solid rgb(235, 229, 229);
+  background-color: #e2e2e4;
+  border-radius: 5px;
+  margin: auto;
+  padding: 20px;
+  width: 30%;
+  margin-top: 8%;
+}
+input {
+  width: 100%;
+  margin: 8px 0;
+  box-sizing: border-box;
+  padding: 12px 0 12px 10px;
+  border: 1px solid rgb(184, 180, 180);
+  border-radius: 10px;
+}
+.registerBit a {
+  text-decoration: none;
+  color: #3774ec;
+  font-size: 15px;
+  display: block;
   text-align: center;
+}
+.registerBit p {
+  font-size: 15px;
+  margin: auto;
+  text-align: center;
+  padding-top: 10px;
+}
+.registerBit a:hover {
+  color: rgb(235, 174, 61);
+}
+button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 0 12px 0;
+  background-color: #3cbc8d;
+  color: white;
+  border: none;
+  border-radius: 10px;
 }
 
 .App-logo {

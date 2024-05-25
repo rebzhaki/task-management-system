@@ -57,17 +57,20 @@ export const setTaskComplainant = (
   connection: Connection,
   complainant: any,
   task: any
-) => {
-  const query = `UPDATE Tasks SET complainant_id = @Complainant WHERE id = @TaskID`;
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE Tasks SET complainant_id = @Complainant WHERE id = @TaskID`;
 
-  const request = new Request(query, (err) => {
-    if (err) {
-      console.log("request error =>", err);
-    }
-    connection.close();
+    const request = new Request(query, (err) => {
+      if (err) {
+        console.log("request error =>", err);
+        return reject(err);
+      }
+      resolve();
+    });
+
+    request.addParameter("Complainant", TYPES.Int, complainant);
+    request.addParameter("TaskID", TYPES.Int, task);
+    connection.execSql(request);
   });
-
-  request.addParameter("Complainant", TYPES.Int, complainant);
-  request.addParameter("TaskID", TYPES.Int, task);
-  connection.execSql(request);
 };

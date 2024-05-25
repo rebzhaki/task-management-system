@@ -17,3 +17,17 @@ export const validateRequest = (
   }
   next();
 };
+
+export const blacklist = new Set();
+
+export const checkBlacklist = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.headers.authorization;
+  if (blacklist.has(token)) {
+    return res.status(401).json({ message: "Token is blacklisted" });
+  }
+  next();
+};

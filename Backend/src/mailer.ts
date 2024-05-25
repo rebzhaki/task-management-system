@@ -29,18 +29,16 @@ export const sendEmail = (data: EmailData): Promise<any> => {
 Your tracking number for the task allocated is ${TrackingNumber}
                   `,
     };
-    let transportData = transporter.sendMail(content, (err, info) => {
+    transporter.sendMail(content, (err, info) => {
       if (err) {
         reject(err);
       } else {
-        return {
+        return resolve({
           message: "email sent",
           info: info.messageId,
           preview: nodemailer.getTestMessageUrl(info),
-        };
+        });
       }
     });
-
-    resolve(transportData);
   });
 };
