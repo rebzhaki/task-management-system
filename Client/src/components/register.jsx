@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Footer from './footer';
 
 const Register = () => {
     const [fullName, setFullName] = useState("")
@@ -70,6 +71,7 @@ const Register = () => {
                     <a href="/login">Login</a>
                 </div>
             </div>
+            < Footer />
         </div>
     )
 }
