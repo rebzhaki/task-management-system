@@ -113,7 +113,7 @@ router.post(
         res.status(200).json({
           success: true,
           message: "Successfully Logged in",
-          data: accessToken,
+          token: accessToken,
         });
       }
     } catch (error) {
@@ -127,9 +127,20 @@ router.post(
 );
 
 router.post("/logout", checkBlacklist, async (req, res) => {
-  const token = req.headers.authorization;
-  blacklist.add(token);
-  res.status(200).json({ message: "Logout successful" });
+  try {
+    const authenticationHeader = req.headers["authorization"];
+    const token: any =
+      authenticationHeader && authenticationHeader.split(" ")[1];
+
+    blacklist.add(token);
+    res.status(200).json({ success: true, message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error,
+    });
+  }
 });
 
 //tasks routes
@@ -148,9 +159,11 @@ router.post(
     try {
       // check authenticated user
       const { task_name, task_priority, due_date, task_description } = req.body;
+
       const authenticationHeader = req.headers["authorization"];
       const token: any =
         authenticationHeader && authenticationHeader.split(" ")[1];
+
       if (!token)
         res.status(401).json({
           success: "false",
@@ -161,9 +174,11 @@ router.post(
         config.JWT_SECRET_KEY,
         (err: any, data: any) => {
           if (err) throw err;
+          return data;
         }
       );
       const userEmail = decodedData["email"];
+
       const user = await getSingleUser(connection, userEmail);
       let userId = user.map((data: any) => data["id"]).join(",");
 
@@ -177,6 +192,7 @@ router.post(
         tracking_number: trackingNumber,
         task_assigner_id: userId,
       };
+
       await saveNewTask(connection, newTask);
 
       res.status(200).json({
