@@ -19,22 +19,29 @@ export const saveNewUser = (connection: Connection, data: any) => {
   connection.execSql(request);
 };
 
-export const getAllUsers = (connection: Connection) => {
-  const query = `SELECT * FROM Users`;
-  const request = new Request(query, (err, rowCount, rows) => {
-    if (err) {
-      console.log("Failed to fetch users =>", err);
-    }
-    const users = rows.map((row: any[]) => {
-      const user: any = {};
-      row.forEach((column: any) => {
-        user[column.metadata.colName] = column.value;
-      });
-      return user;
+export const getAllUsers = (connection: Connection): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM Users`;
+    const request = new Request(query, (err, rowCount) => {
+      if (err) {
+        return reject(err);
+      } else if (rowCount === 0) {
+        return resolve(null);
+      }
     });
-    console.log("all users", users);
+    const users: any[] = [];
+    request.on("row", (columns) => {
+      const rowdata: any = {};
+      columns.forEach((column: any) => {
+        rowdata[column.metadata.colName] = column.value;
+      });
 
-    connection.close();
+      users.push(rowdata);
+    });
+    request.on("requestCompleted", () => {
+      resolve(users);
+    });
+    connection.execSql(request);
   });
 };
 

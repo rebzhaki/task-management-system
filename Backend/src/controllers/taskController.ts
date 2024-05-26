@@ -53,6 +53,31 @@ export const getTaskById = (connection: Connection, _id: any): Promise<any> => {
   });
 };
 
+export const getTaskAllTasks = (connection: Connection): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM Tasks`;
+    const request = new Request(query, (err, rowCount) => {
+      if (err) {
+        return reject(err);
+      } else if (rowCount === 0) {
+        return resolve(null);
+      }
+    });
+    const task: any[] = [];
+    request.on("row", (columns) => {
+      const rowdata: any = {};
+      columns.forEach((column: any) => {
+        rowdata[column.metadata.colName] = column.value;
+      });
+
+      task.push(rowdata);
+    });
+    request.on("requestCompleted", () => {
+      resolve(task);
+    });
+    connection.execSql(request);
+  });
+};
 export const setTaskComplainant = (
   connection: Connection,
   complainant: any,

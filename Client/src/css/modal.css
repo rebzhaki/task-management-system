@@ -57,3 +57,8 @@ select {
   margin: 50px;
   text-align: center;
 }
+@media screen and (max-width: 1000px) {
+  h4 {
+    font-size: 18px;
+  }
+}

@@ -33,6 +33,11 @@
   margin: auto;
   margin-bottom: 20px;
 }
+.profile-container-section:hover {
+  cursor: pointer;
+  /* background-color: #606060; */
+  opacity: 0.6;
+}
 .mid {
   width: 48vw;
   border-radius: 15px;
@@ -123,6 +128,11 @@
   border-radius: 10px;
   font-weight: 900;
   padding: 10px;
+  height: 45px;
+}
+.list-gig-header button:hover {
+  opacity: 0.8;
+  cursor: pointer;
 }
 .list-gig-table-header {
   width: 90%;
@@ -147,7 +157,7 @@
   color: gray;
   border-bottom: 1px solid lightgray;
 }
-.taskButton {
+.list-gig-table-body .taskButton {
   width: 50% !important;
   margin-top: 8px;
   padding: 12px 0 12px 0;
@@ -160,27 +170,26 @@
   display: grid;
   text-align: left;
   padding-left: 0;
-  grid-template-columns: 1fr 5fr;
-  margin-left: 15px;
+  /* margin-left: 15px; */
 }
 .list-gig-table-body button {
   padding: 5px;
   border-radius: 5px;
   margin-left: 10px;
   border: none;
-  background-color: #fdf2d6;
-  color: #e2b33a;
+  background-color: #fdf2d6 !important;
+  color: #e2b33a !important;
   min-width: 90px;
   margin-top: 5px;
   font-weight: 700;
 }
 .list-gig-table-body p {
-  padding-top: 5px;
+  padding-top: 0px !important;
 }
 .list-gig-table-body .gig,
 .stage,
 .status {
-  margin-left: 10px;
+  margin-left: 18px;
 }
 .list-gig-table-body .name .job-feed-image {
   border-radius: 10px;
@@ -299,11 +308,28 @@
 @media screen and (max-width: 1000px) {
   .mid {
     width: 100vw;
+    margin: 20px;
   }
   .left {
     display: none;
   }
   .right {
     display: none;
+  }
+  .mainHeader {
+    margin-left: 20px;
+  }
+  .list-gig-header button {
+    width: 30%;
+    height: 45px;
+  }
+  .list-gig-header {
+    padding: 0px 0px 20px 0px;
+  }
+  .list-gig-header p {
+    font-size: 20px;
+  }
+  .list-gig-header span {
+    font-size: 15px;
   }
 }

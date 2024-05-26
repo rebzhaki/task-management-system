@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "../css/modal.css"
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 export const NewTaskModal = ({ show, onClose }) => {
     const [taskName, setTaskName] = useState("")
@@ -9,8 +8,6 @@ export const NewTaskModal = ({ show, onClose }) => {
     const [dueDate, setDueDate] = useState("")
     const [taskPriority, setTaskPriority] = useState("Pending")
     const [user, setUser] = useState("")
-
-    const navigate = useNavigate()
 
     useEffect(() => {
         const user = localStorage.getItem("jwtToken");
@@ -42,7 +39,6 @@ export const NewTaskModal = ({ show, onClose }) => {
             );
 
             if (response.data.success) {
-                console.log(response.data);
                 alert('Successfully created task');
                 window.location.reload()
             }

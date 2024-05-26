@@ -7,7 +7,9 @@ import { config } from "../config";
 import { nanoid } from "nanoid";
 import {
   checkIfUserExists,
+  getAllUsers,
   getSingleUser,
+  getTaskAllTasks,
   getTaskById,
   getUserById,
   saveNewTask,
@@ -126,6 +128,83 @@ router.post(
   }
 );
 
+router.get("/user", async (req, res) => {
+  try {
+    const authenticationHeader = req.headers["authorization"];
+    const token: any =
+      authenticationHeader && authenticationHeader.split(" ")[1];
+
+    if (!token)
+      res.status(401).json({
+        success: "false",
+        message: "Denied access, no token provided",
+      });
+    let decodedData: any = jwt.verify(
+      token,
+      config.JWT_SECRET_KEY,
+      (err: any, data: any) => {
+        if (err) throw err;
+        return data;
+      }
+    );
+
+    const userEmail = decodedData["email"];
+
+    const user = await getSingleUser(connection, userEmail);
+    let fullName = user.map((data: any) => data["fullName"]).join(",");
+
+    const userData = {
+      userEmail: userEmail,
+      fullName: fullName,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Task created successfully",
+      data: userData,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error,
+    });
+  }
+});
+
+router.get("/getAllUsers", async (req, res) => {
+  try {
+    const authenticationHeader = req.headers["authorization"];
+    const token: any =
+      authenticationHeader && authenticationHeader.split(" ")[1];
+
+    if (!token)
+      res.status(401).json({
+        success: "false",
+        message: "Denied access, no token provided",
+      });
+    jwt.verify(token, config.JWT_SECRET_KEY, (err: any, data: any) => {
+      if (err) throw err;
+      return data;
+    });
+
+    const users = await getAllUsers(connection);
+    const allUsers = users.map((data: any) => data);
+
+    res.status(200).json({
+      success: true,
+      message: "Task created successfully",
+      data: allUsers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error,
+    });
+  }
+});
+
 router.post("/logout", checkBlacklist, async (req, res) => {
   try {
     const authenticationHeader = req.headers["authorization"];
@@ -209,6 +288,82 @@ router.post(
     }
   }
 );
+
+router.get("/getAllTasks", async (req, res) => {
+  try {
+    const authenticationHeader = req.headers["authorization"];
+    const token: any =
+      authenticationHeader && authenticationHeader.split(" ")[1];
+
+    if (!token)
+      res.status(401).json({
+        success: "false",
+        message: "Denied access, no token provided",
+      });
+    let decodedData: any = jwt.verify(
+      token,
+      config.JWT_SECRET_KEY,
+      (err: any, data: any) => {
+        if (err) throw err;
+        return data;
+      }
+    );
+
+    const tasks = await getTaskAllTasks(connection);
+    const allTasks = tasks.map((data: any) => data);
+
+    res.status(200).json({
+      success: true,
+      message: "Task created successfully",
+      data: allTasks,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error,
+    });
+  }
+});
+
+router.get("/getTaskById/:_id", async (req, res) => {
+  try {
+    const authenticationHeader = req.headers["authorization"];
+    const token: any =
+      authenticationHeader && authenticationHeader.split(" ")[1];
+
+    if (!token)
+      res.status(401).json({
+        success: "false",
+        message: "Denied access, no token provided",
+      });
+    let decodedData: any = jwt.verify(
+      token,
+      config.JWT_SECRET_KEY,
+      (err: any, data: any) => {
+        if (err) throw err;
+        return data;
+      }
+    );
+
+    const taskId = req.params._id;
+
+    const task = await getTaskById(connection, taskId);
+    let taskData = task.map((data: any) => data);
+
+    res.status(200).json({
+      success: true,
+      message: "Task created successfully",
+      data: taskData,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error,
+    });
+  }
+});
 
 router.patch(
   "/updateTaskComplainant/:_id",
