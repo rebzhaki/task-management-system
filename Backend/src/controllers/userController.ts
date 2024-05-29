@@ -75,22 +75,23 @@ export const getSingleUser = (
 
     const request = new Request(query, (err, rowCount) => {
       if (err) {
-        return reject(err);
+        console.log({ err });
+        reject(err);
       } else if (rowCount === 0) {
         return resolve(null);
       }
     });
-    const user: any[] = [];
+    let user: Record<string, string | number> = {};
     request.on("row", (columns) => {
-      const rowdata: any = {};
-      columns.forEach((column: any) => {
-        rowdata[column.metadata.colName] = column.value;
-      });
-
-      user.push(rowdata);
+      columns.forEach(
+        (column: any) => (user[column.metadata.colName] = column.value)
+      );
     });
     request.on("requestCompleted", () => {
       resolve(user);
+    });
+    request.on("done", (rowCount) => {
+      console.log("done", rowCount);
     });
 
     request.addParameter("Email", TYPES.NVarChar, data);

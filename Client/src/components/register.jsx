@@ -68,10 +68,10 @@ const Register = () => {
                 </form>
                 <div className="registerBit">
                     <p>You have an account?</p>
-                    <a href="/login">Login</a>
+                    <a href="/">Login</a>
                 </div>
             </div>
-            < Footer />
+            {/* < Footer /> */}
         </div>
     )
 }

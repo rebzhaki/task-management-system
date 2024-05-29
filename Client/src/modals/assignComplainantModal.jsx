@@ -8,6 +8,8 @@ export const AssignModal = ({ show, onClose, taskID }) => {
     const [user, setUser] = useState("")
     const [userData, setUsersData] = useState([])
     const [task, setTask] = useState([])
+    const [isLoading, setIsLoading] = useState(false);
+
 
     const navigate = useNavigate()
 
@@ -61,10 +63,11 @@ export const AssignModal = ({ show, onClose, taskID }) => {
     formData.append("complainant_id", complainant)
 
     const handleSubmit = async (e) => {
+        setIsLoading(true);
         e.preventDefault();
         try {
             const response = await axios.patch(
-                `http://localhost:8000/v1/api/updateTaskComplainant/${complainant}`,
+                `http://localhost:8000/v1/api/updateTaskComplainant/${taskID}`,
                 formData,
                 {
                     headers: {
@@ -74,40 +77,42 @@ export const AssignModal = ({ show, onClose, taskID }) => {
                 }
             );
             if (response.data.success) {
-                console.log("damn==>", response.data.data);
-                alert('Successfully assigned task');
+                alert('Successfully assigned task! You will be redirected to your email account to access your tracking number');
                 window.open(response.data.data.preview, '_blank');
                 window.location.reload()
 
             }
         } catch (error) {
             console.error(error.response.data);
+        } finally {
+            setIsLoading(false); // Hide loader
         }
     };
 
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <h2>Add New Task</h2>
+                <h2>Assign Task</h2>
                 <form >
                     {task.map((data) => {
                         return (
-                            <><label>Task Name:</label><br />
-                                <span>{data.task_name}</span><br />
-                                <label>Task Description:</label><br />
-                                <span>{data.task_description}</span></>
+                            <><label className="assignLabel">Task Name:</label><br /><br />
+                                <span className="assignSpan">{data.task_name}</span><br /><br />
+                                <label className="assignLabel">Task Description:</label><br /><br />
+                                <span className="assignSpan">{data.task_description.length > 50 ? `${data.task_description.substring(0, 150)}...` : data.task_description}
+                                </span></>
 
                         )
                     })}
 
                     <div>
-                        <label>Assign task:</label>
+                        <br /> <label className="assignLabel" >Assign task:</label>
                         <select
                             name="complainant_id"
                             value={complainant}
                             onChange={(e) => setComplainant(e.target.value)}
                         >
-                            <option value="">Choose ...</option>
+                            <option value="">Choose complainant ...</option>
                             {userData.map((data) => (
                                 <option key={data.id} value={data.id}>
                                     {data.fullName}
@@ -117,7 +122,20 @@ export const AssignModal = ({ show, onClose, taskID }) => {
 
                     </div>
                     <div style={{ position: "relative" }}>
-                        <button style={{ width: "20%" }} onClick={handleSubmit}>Submit</button>
+                        <button
+                            style={{ width: "20%", position: "relative" }}
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <span>
+                                    Loading...
+                                </span>
+                            ) : <span >
+                                Submit
+                            </span>}
+
+                        </button>
                         <button className="modalButton" onClick={onClose}>close</button>
                     </div>
                 </form>

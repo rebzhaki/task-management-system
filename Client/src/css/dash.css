@@ -33,9 +33,14 @@
   margin: auto;
   margin-bottom: 20px;
 }
+.task {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  width: 100%;
+  color: gray;
+}
 .profile-container-section:hover {
   cursor: pointer;
-  /* background-color: #606060; */
   opacity: 0.6;
 }
 .mid {
@@ -112,13 +117,13 @@
   flex-direction: row;
   justify-content: space-between;
   padding: 20px;
-  width: 90%;
-  margin: auto;
+  width: 85%;
+  /* margin: auto; */
   text-align: left;
   font-size: 1vw;
   font-weight: bold;
-  padding-left: 40px;
-  padding-right: 40px;
+  /* padding-left: 40px; */
+  /* padding-right: 40px; */
 }
 .list-gig-header button {
   width: 12%;
@@ -135,13 +140,16 @@
   cursor: pointer;
 }
 .list-gig-table-header {
-  width: 90%;
+  width: 100%;
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   text-align: left;
-  margin: auto;
+  /* margin: auto; */
   margin-bottom: 20px;
-  color: gray;
+  color: rgb(80, 72, 72);
+  font-weight: 400;
+  padding-bottom: 10px;
+  border-bottom: 1px solid gray;
 }
 .list-gig-table-header * {
   padding-left: 15px;
@@ -157,7 +165,7 @@
   color: gray;
   border-bottom: 1px solid lightgray;
 }
-.list-gig-table-body .taskButton {
+.taskButton {
   width: 50% !important;
   margin-top: 8px;
   padding: 12px 0 12px 0;
@@ -181,6 +189,16 @@
   color: #e2b33a !important;
   min-width: 90px;
   margin-top: 5px;
+  font-weight: 700;
+}
+.taskPriority {
+  padding: 5px;
+  border-radius: 5px;
+  margin-left: 10px;
+  border: none;
+  background-color: #fdf2d6 !important;
+  color: #e2b33a !important;
+  min-width: 90px;
   font-weight: 700;
 }
 .list-gig-table-body p {

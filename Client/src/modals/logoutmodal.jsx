@@ -29,7 +29,7 @@ export const LogOutModal = ({ show, onClose }) => {
             if (response.data.success) {
                 setTimeout(alert('Successfully logged out'), 100)
 
-                window.location.href = "/login"
+                window.location.href = "/"
             }
         } catch (error) {
             console.error(error.response.data);
@@ -45,8 +45,8 @@ export const LogOutModal = ({ show, onClose }) => {
                 <form >
                     <p className="modalContent">Clocking out for the day?</p>
                     <div style={{ position: "relative" }}>
-                        <button style={{ width: "20%" }} onClick={handleSubmit}>Yes</button>
                         <button className="modalButton" onClick={onClose}>No</button>
+                        <button style={{ width: "20%" }} onClick={handleSubmit}>Yes</button>
                     </div>
                 </form>
             </div>

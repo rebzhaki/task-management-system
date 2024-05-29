@@ -9,7 +9,6 @@ export const saveNewTask = (connection: Connection, data: any) => {
     if (err) {
       console.log("request error =>", err);
     }
-    connection.close();
   });
 
   request.addParameter("TaskName", TYPES.NVarChar, data.task_name);
@@ -21,7 +20,7 @@ export const saveNewTask = (connection: Connection, data: any) => {
     data.task_description
   );
   request.addParameter("TrackingNumber", TYPES.NVarChar, data.tracking_number);
-  request.addParameter("TaskAssignerId", TYPES.NVarChar, data.task_assigner_id);
+  request.addParameter("TaskAssignerId", TYPES.Int, data.task_assigner_id);
 
   connection.execSql(request);
 };
@@ -60,20 +59,20 @@ export const getTaskAllTasks = (connection: Connection): Promise<any> => {
       if (err) {
         return reject(err);
       } else if (rowCount === 0) {
-        return resolve(null);
+        return resolve([]);
       }
     });
-    const task: any[] = [];
+    const tasks: any = [];
     request.on("row", (columns) => {
       const rowdata: any = {};
       columns.forEach((column: any) => {
         rowdata[column.metadata.colName] = column.value;
       });
 
-      task.push(rowdata);
+      tasks.push(rowdata);
     });
     request.on("requestCompleted", () => {
-      resolve(task);
+      resolve(tasks);
     });
     connection.execSql(request);
   });

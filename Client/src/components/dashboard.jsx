@@ -36,50 +36,49 @@ const DashboardPage = () => {
         setIsLogoutModalOpen(!isLogoutModalOpen);
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const user = localStorage.getItem("jwtToken");
-            if (!user) {
-                console.error("No token found");
-                return;
-            }
+    const fetchData = async () => {
+        const user = localStorage.getItem("jwtToken");
+        if (!user) {
+            console.error("No token found");
+            return;
+        }
 
-            const headers = {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${user}`
-            };
-
-            try {
-                const getUser = async () => {
-                    try {
-                        const response = await axios.get('http://localhost:8000/v1/api/user', { headers });
-                        setUserName(response.data.data.fullName);
-                        setUserEmail(response.data.data.userEmail);
-                        return response.data.data;
-                    } catch (error) {
-                        console.error('Error fetching user data:', error);
-                        throw error;
-                    }
-                };
-
-                const getAllTasks = async () => {
-                    try {
-                        const response = await axios.get('http://localhost:8000/v1/api/getAllTasks', { headers });
-                        setTasks(response.data.data);
-                        return response.data.data;
-                    } catch (error) {
-                        console.error('Error fetching tasks:', error);
-                        throw error;
-                    }
-                };
-
-                await getUser();
-                await getAllTasks();
-            } catch (error) {
-                console.error('Error in fetchData:', error);
-            }
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user}`
         };
 
+        try {
+            const getUser = async () => {
+                try {
+                    const response = await axios.get('http://localhost:8000/v1/api/user', { headers });
+                    setUserName(response.data.data.fullName);
+                    setUserEmail(response.data.data.userEmail);
+                    return response.data.data;
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    throw error;
+                }
+            };
+
+            const getAllTasks = async () => {
+                try {
+                    const response = await axios.get('http://localhost:8000/v1/api/getAllTasks', { headers });
+                    setTasks(response.data.data);
+                    return response.data.data;
+                } catch (error) {
+                    console.error('Error fetching tasks:', error);
+                    throw error;
+                }
+            };
+
+            await getUser();
+            await getAllTasks();
+        } catch (error) {
+            console.error('Error in fetchData:', error);
+        }
+    };
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -105,7 +104,7 @@ const DashboardPage = () => {
                     </div>
                 </div>
                 <div className='mid'>
-                    <h1 className="mainHeader">Tiabidii Management</h1>
+                    <h1 className="mainHeader">Tiabidii Management System</h1>
                     <div className="list">
                         <div className='list-gig-header'>
                             <p>Listed Tasks<br /> <span style={{ fontSize: "small", color: "gray" }}>Tasks posted so far</span></p>
@@ -117,13 +116,13 @@ const DashboardPage = () => {
                             <div className='gig'>NUMBER</div>
                             <div className='status'>STATUS</div>
                         </div>
-                        <div className='list-gig-table-body'>
+                        <div className='' style={{ textAlign: "left" }}>
                             {tasks.map((data) => {
                                 return (
                                     <div key={data.id} className="task">
                                         < div className='name' > <p>{data.task_name}</p></div>
                                         <div className='gig'><p>{data.tracking_number}</p></div>
-                                        <div className='status'><button>{data.task_priority}</button></div>
+                                        <div className='status'><button className="taskPriority">{data.task_priority}</button></div>
                                         <div className='stage'> <button className="taskButton" onClick={() => assignTaskModal(data.id)} >Assign</button> </div>
                                     </div>
                                 )
@@ -147,7 +146,7 @@ const DashboardPage = () => {
                         </div>
                         <div className='right-main-item'>
                             <div className="right-main-title">
-                                <h5>You posted a task</h5>
+                                <h5>You are assigned a task</h5>
                             </div>
                             <div className="right-main-data">
                                 <p>{today}</p>
@@ -156,7 +155,7 @@ const DashboardPage = () => {
                         </div>
                         <div className='right-main-item'>
                             <div className="right-main-title">
-                                <h5>You posted a task</h5>
+                                <h5>Your task is Completed</h5>
                             </div>
                             <div className="right-main-data">
                                 <p>{today}</p>
@@ -165,7 +164,7 @@ const DashboardPage = () => {
                         </div>
                         <div className='right-main-item'>
                             <div className="right-main-title">
-                                <h5>You posted a task</h5>
+                                <h5>Your task is being reviews</h5>
                             </div>
                             <div className="right-main-data">
                                 <p>{today}</p>

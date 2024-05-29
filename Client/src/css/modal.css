@@ -53,6 +53,18 @@ select {
   border: 1px solid rgb(184, 180, 180);
   border-radius: 10px;
 }
+.assignLabel {
+  font-size: 14px;
+  padding-top: 20px;
+}
+.assignSpan {
+  color: black;
+  font-size: 15px;
+  border: 1px solid;
+  border-style: none;
+  /* padding: 20px; */
+  width: auto;
+}
 .modalContent {
   margin: 50px;
   text-align: center;

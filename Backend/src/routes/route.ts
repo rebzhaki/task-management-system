@@ -18,7 +18,6 @@ import {
 } from "../controllers";
 import { DatabaseConnection } from "./app";
 import { sendEmail } from "../mailer";
-import { error } from "console";
 
 const router = Router();
 const app: Express = express();
@@ -93,16 +92,16 @@ router.post(
       const { email, password } = req.body;
 
       const user = await getSingleUser(connection, email);
-      let pass = await user
-        .map((data: any) => {
-          return data["password"];
-        })
-        .join(",");
+      // let pass = await user
+      //   .map((data: any) => {
+      //     return data["password"];
+      //   })
+      //   .join(",");
 
       if (user === null) {
         res.status(400).json({ status: false, message: "User Not Found" });
       } else {
-        let passwordIsValid = bcrypt.compareSync(password, pass);
+        let passwordIsValid = bcrypt.compareSync(password, user.password);
         if (!passwordIsValid) {
           return res.status(401).send({
             accessToken: null,
@@ -131,43 +130,59 @@ router.post(
 router.get("/user", async (req, res) => {
   try {
     const authenticationHeader = req.headers["authorization"];
-    const token: any =
-      authenticationHeader && authenticationHeader.split(" ")[1];
+    const token = authenticationHeader && authenticationHeader.split(" ")[1];
 
-    if (!token)
-      res.status(401).json({
-        success: "false",
-        message: "Denied access, no token provided",
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Access denied, no token provided",
       });
-    let decodedData: any = jwt.verify(
-      token,
-      config.JWT_SECRET_KEY,
-      (err: any, data: any) => {
-        if (err) throw err;
-        return data;
-      }
-    );
+    }
 
-    const userEmail = decodedData["email"];
+    let decodedData: any;
+    try {
+      decodedData = jwt.verify(token, config.JWT_SECRET_KEY);
+    } catch (err) {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid or expired token",
+        error: { code: "EINVALIDTOKEN" },
+      });
+    }
+
+    // Check if the user is in the "LoggedIn" state
+
+    const userEmail = decodedData.email;
 
     const user = await getSingleUser(connection, userEmail);
-    let fullName = user.map((data: any) => data["fullName"]).join(",");
+    if (!user || user.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // let fullName = user.map((data: any) => data.fullName).join(",");
 
     const userData = {
       userEmail: userEmail,
-      fullName: fullName,
+      fullName: user.fullName,
     };
 
     res.status(200).json({
       success: true,
-      message: "Task created successfully",
+      message: "User data retrieved successfully",
       data: userData,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error(error); // Logging the error for debugging purposes
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: error,
+      error: {
+        code: error.code || "EINTERNALSERVER",
+        message: error.message || "An unexpected error occurred",
+      },
     });
   }
 });
@@ -256,10 +271,9 @@ router.post(
           return data;
         }
       );
-      const userEmail = decodedData["email"];
+      const userEmail = decodedData.email;
 
       const user = await getSingleUser(connection, userEmail);
-      let userId = user.map((data: any) => data["id"]).join(",");
 
       //generate tracking number
       const trackingNumber = `T-${nanoid(5)}`;
@@ -269,10 +283,10 @@ router.post(
         due_date: due_date,
         task_description: task_description,
         tracking_number: trackingNumber,
-        task_assigner_id: userId,
+        task_assigner_id: user.id,
       };
 
-      await saveNewTask(connection, newTask);
+      saveNewTask(connection, newTask);
 
       res.status(200).json({
         success: true,
