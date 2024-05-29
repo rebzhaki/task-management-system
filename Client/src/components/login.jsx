@@ -1,10 +1,12 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { URL } from "../config";
 const LoginPage = () => {
     const [emailAddress, setEmailAddress] = useState("")
     const [passWord, setPassword] = useState("")
     const navigate = useNavigate()
+
 
     const formData = new FormData();
     formData.append("email", emailAddress)
@@ -14,7 +16,7 @@ const LoginPage = () => {
         e.preventDefault();
         await axios({
             method: 'POST',
-            url: 'http://localhost:8000/v1/api/login',
+            url: `${URL}/login`,
             headers: {
                 "Content-Type": "application/json"
             },
@@ -22,15 +24,13 @@ const LoginPage = () => {
         })
             .then(res => {
                 if (res.data.success) {
-                    localStorage.setItem('jwtToken', res.data.token)
-                    axios.defaults.headers.common['Authorization'] =
-                        'Bearer' + res.data.token
-                    navigate('/dashboard')
+                    localStorage.setItem('jwtToken', res.data?.token);
+                    navigate("/dashboard")
                 }
             })
 
             .catch((err) => {
-                return err.response.data;
+                return err;
             })
     }
     return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "../css/modal.css"
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { URL } from "../config";
 
 export const AssignModal = ({ show, onClose, taskID }) => {
     const [complainant, setComplainant] = useState("")
@@ -11,7 +11,6 @@ export const AssignModal = ({ show, onClose, taskID }) => {
     const [isLoading, setIsLoading] = useState(false);
 
 
-    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,7 +28,7 @@ export const AssignModal = ({ show, onClose, taskID }) => {
 
             try {
                 const taskResponse = await axios.get(
-                    `http://localhost:8000/v1/api/getTaskById/${taskID}`,
+                    `${URL}/getTaskById/${taskID}`,
                     { headers }
                 );
 
@@ -38,7 +37,7 @@ export const AssignModal = ({ show, onClose, taskID }) => {
                 }
 
                 const usersResponse = await axios.get(
-                    `http://localhost:8000/v1/api/getAllUsers`,
+                    `${URL}/getAllUsers`,
                     { headers }
                 );
 
@@ -67,7 +66,7 @@ export const AssignModal = ({ show, onClose, taskID }) => {
         e.preventDefault();
         try {
             const response = await axios.patch(
-                `http://localhost:8000/v1/api/updateTaskComplainant/${taskID}`,
+                `${URL}/updateTaskComplainant/${taskID}`,
                 formData,
                 {
                     headers: {

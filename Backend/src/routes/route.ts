@@ -220,7 +220,7 @@ router.get("/getAllUsers", async (req, res) => {
   }
 });
 
-router.post("/logout", checkBlacklist, async (req, res) => {
+router.post("/logout", async (req, res) => {
   try {
     const authenticationHeader = req.headers["authorization"];
     const token: any =

@@ -3,11 +3,11 @@ import "../css/dash.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import prof from "../assets/user.png"
-import jobfeed from "../assets/jobfeed.png"
-import { feed, notification, profile, history, settings, arrow, active } from "../icons"
+import { feed, notification, profile, history, settings, arrow } from "../icons"
 import { NewTaskModal } from "../modals/newTaskModal";
 import { LogOutModal } from "../modals/logoutmodal";
 import { AssignModal } from "../modals/assignComplainantModal";
+import { URL } from "../config";
 
 const DashboardPage = () => {
     const navigate = useNavigate()
@@ -51,7 +51,7 @@ const DashboardPage = () => {
         try {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('http://localhost:8000/v1/api/user', { headers });
+                    const response = await axios.get(`${URL}/user`, { headers });
                     setUserName(response.data.data.fullName);
                     setUserEmail(response.data.data.userEmail);
                     return response.data.data;
@@ -63,7 +63,7 @@ const DashboardPage = () => {
 
             const getAllTasks = async () => {
                 try {
-                    const response = await axios.get('http://localhost:8000/v1/api/getAllTasks', { headers });
+                    const response = await axios.get(`${URL}/getAllTasks`, { headers });
                     setTasks(response.data.data);
                     return response.data.data;
                 } catch (error) {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Footer from './footer';
+import { URL } from '../config';
 
 const Register = () => {
     const [fullName, setFullName] = useState("")
@@ -23,7 +23,7 @@ const Register = () => {
         e.preventDefault();
         await axios({
             method: 'post',
-            url: 'http://localhost:8000/v1/api/register',
+            url: `${URL}/register`,
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"

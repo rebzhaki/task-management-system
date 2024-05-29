@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../css/modal.css"
 import axios from "axios";
+import { URL } from "../config";
 
 export const LogOutModal = ({ show, onClose }) => {
     const [user, setUser] = useState("")
@@ -17,7 +18,7 @@ export const LogOutModal = ({ show, onClose }) => {
         e.preventDefault();
         try {
             const response = await axios.post(
-                'http://localhost:8000/v1/api/logout',
+                `${URL}/logout`,
                 {},
                 {
                     headers: {
@@ -27,7 +28,7 @@ export const LogOutModal = ({ show, onClose }) => {
                 }
             );
             if (response.data.success) {
-                setTimeout(alert('Successfully logged out'), 100)
+                alert('Successfully logged out')
 
                 window.location.href = "/"
             }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../css/modal.css"
 import axios from "axios";
+import { URL } from "../config";
 
 export const NewTaskModal = ({ show, onClose }) => {
     const [taskName, setTaskName] = useState("")
@@ -28,7 +29,7 @@ export const NewTaskModal = ({ show, onClose }) => {
 
         try {
             const response = await axios.post(
-                'http://localhost:8000/v1/api/createNewTask',
+                `${URL}/createNewTask`,
                 formData,
                 {
                     headers: {
