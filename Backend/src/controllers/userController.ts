@@ -8,7 +8,6 @@ export const saveNewUser = (connection: Connection, data: any) => {
     if (err) {
       console.log("request error =>", err);
     }
-    connection.close();
   });
 
   request.addParameter("fullName", TYPES.NVarChar, data.fullName);

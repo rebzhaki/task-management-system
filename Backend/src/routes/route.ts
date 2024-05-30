@@ -62,7 +62,8 @@ router.post(
               email,
               password,
             };
-            await saveNewUser(connection, newUser);
+
+            saveNewUser(connection, newUser);
             res.status(200).json({
               success: true,
               message: "User successfully registered",
@@ -161,8 +162,6 @@ router.get("/user", async (req, res) => {
         message: "User not found",
       });
     }
-
-    // let fullName = user.map((data: any) => data.fullName).join(",");
 
     const userData = {
       userEmail: userEmail,

@@ -13,7 +13,7 @@ export const configs: any = {
   },
   options: {
     database: config.DATABASE,
-    encrypt: false,
+    encrypt: true,
     port: 1433,
   },
 };
